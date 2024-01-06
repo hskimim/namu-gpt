@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "namu-gpt"
+version = "0.1.0"
+description = ""
+authors = ["hskimim <hskimim8855@gmail.com>"]
+readme = "README.md"
+packages = [{include = "namu_gpt"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.31.0"
+bs4 = "^0.0.1"
+langchain = "^0.0.354"
+python-dotenv = "^1.0.0"
+tiktoken = "^0.5.2"
+openai = "^1.6.1"
+lxml = "^5.0.1"
+chromadb = "^0.4.22"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
