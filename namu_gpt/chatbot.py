@@ -1,75 +1,40 @@
-import re
-from copy import deepcopy
-from pydantic import BaseModel
-
-from langchain.vectorstores import Chroma
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.chat_models import ChatOpenAI
-from langchain.chains.router import MultiRetrievalQAChain
-
-from namu_gpt import constant
-from namu_gpt.crawler import NamuRecursiveUrlLoader
-from namu_gpt.document import HierachicalDocuments
-
-from dotenv import load_dotenv
-import logging
-
-
-load_dotenv(verbose=True)
-logger = logging.getLogger().setLevel(logging.INFO)
-
-embedder = OpenAIEmbeddings(model=constant.TEXT_EMBEDDING_MODEL_NAME)
-llm = ChatOpenAI(model=constant.LLM_MODEL_NAME)
+from langchain.schema import SystemMessage
+from langchain.memory import ChatMessageHistory
+from namu_gpt.retriever import NamuRetriever
 
 
 class NamuAgent:
-    def recursive_load(
+    def __init__(
         self,
-        start_url: str,
+        url: str,
         max_depth: int = 2,
         max_length: int = 1000,
-    ) -> HierachicalDocuments:
-        logging.info("[recursive_load]")
-        docs = NamuRecursiveUrlLoader(
-            url=start_url,
-            max_depth=max_depth,
-            max_length=max_length,
-        ).load()
-        return HierachicalDocuments(data=docs)
+        system_prompt: str | None = "You are a helpful assistant.",
+        memory: bool = True,
+        verbose: bool = False,
+    ) -> None:
+        self._url = url
+        self._retriever = NamuRetriever(url, max_depth, max_length, verbose)
+        self._namu_agent = self._retriever._init_agent(verbose)
+        self.memory = memory
 
-    def intialize_multiple_retrievers(
-        self,
-        documents: HierachicalDocuments,
-    ) -> list[dict]:
-        logging.info("[intialize_multiple_retrievers]")
-        retriever_infos = []
+        if memory:
+            self._chat_history = ChatMessageHistory()
+            if system_prompt:
+                self._chat_history.add_message(SystemMessage(content=system_prompt))
 
-        for splitted_doc in documents.postprocess_txt():
-            retreiver = Chroma.from_documents(
-                documents=splitted_doc,
-                embedding=embedder,
-            ).as_retriever()
+    def __call__(self, query: str) -> str:
+        if self.memory:
+            self._chat_history.add_user_message(query)
+        msg = self._namu_agent(self._chat_history)
+        if self.memory:
+            self._chat_history.add_ai_message(msg["result"])
+        return msg["result"]
 
-            title = splitted_doc[0].metadata["title"]
-            content = constant.DESC_PROMPT.format(title=title)
-            dict_ = {
-                "name": title,
-                "description": content,
-                "retriever": retreiver,
-            }
+    @property
+    def chat_history(self):
+        return self._chat_history
 
-            retriever_infos.append(dict_)
-        return retriever_infos
-
-    def initialize_multi_retrieval_qabot(
-        self,
-        multi_retrievers: list[dict],
-        verbose: bool = True,
-    ) -> MultiRetrievalQAChain:
-        logging.info("[initialize_multi_retrieval_qabot]")
-        chain = MultiRetrievalQAChain.from_retrievers(
-            llm,
-            multi_retrievers,
-            verbose=verbose,
-        )
-        return chain
+    @property
+    def namu_retriever(self) -> NamuRetriever:
+        return self._retriever
