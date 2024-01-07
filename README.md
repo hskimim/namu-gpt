@@ -6,10 +6,11 @@
 
 ## 2. 테스트 실행
 1. `.env` 파일을 가장 바깥 경로에 (`README.md`와 같은 경로) 만들어 openai 의 api key를 써줍니다. 
-   * `OPENAI_API_KEY = "xxx"`
+```console
+ OPENAI_API_KEY = "xxx"
+```
 
-
-2. `test.py`를 실행합니다. 
+1. `test.py`를 실행합니다. 
 
 ```console
  poetry run python tests/test.py 
