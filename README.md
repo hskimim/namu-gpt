@@ -5,7 +5,8 @@
 초기에 설정된 url 을 설정하면 정해진 깊이나 개수만큼 recursive 하게 나무위키의 하이퍼링크를 타고 들어가며 데이터를 축적합니다. (기존 langchain 의 RecursiveUrlLoader 수정)
 
 ## 2. 테스트 실행
-1. `.env` 파일을 가장 바깥 경로에 (`README.md`와 같은 경로) 만들어 openai 의 api key를 써줍니다. `OPENAI_API_KEY = "xxx"`
+1. `.env` 파일을 가장 바깥 경로에 (`README.md`와 같은 경로) 만들어 openai 의 api key를 써줍니다. 
+   * `OPENAI_API_KEY = "xxx"`
 
 
 2. `test.py`를 실행합니다. 
