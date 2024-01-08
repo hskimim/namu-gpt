@@ -5,15 +5,27 @@
 초기에 설정된 url 을 설정하면 정해진 깊이나 개수만큼 recursive 하게 나무위키의 하이퍼링크를 타고 들어가며 데이터를 축적합니다. (기존 langchain 의 RecursiveUrlLoader 수정)
 
 ## 2. 테스트 실행
-1. `env` 파일에 openai 의 api key를 써주고 파일 이름을 `.env` 로 바꿔줍니다 `env` $\rightarrow$ `.env`
-```console
- OPENAI_API_KEY = "xxx"
+```consoles
+poetry run python examples/example.py
 ```
+```python
+from namu_gpt.chatbot import NamuAgent
 
-2. `test.py`를 실행합니다. 
+if __name__ == "__main__":
+    url = "https://namu.wiki/w/메이플스토리/레벨별%20육성"
+    agent = NamuAgent(url, verbose=True)
 
-```console
- poetry run python tests/test.py 
+    # RAG based Q/A
+    question = "메이플스토리 입문자인데. 캐릭터를 잘 육성할 수 있는 팁 좀 알려줘"
+    answer = agent(question)
+    answer
+    # 메이플스토리에서 캐릭터를 잘 육성하기 위한 몇 가지 팁을 알려드릴게요.
+
+    # 1. 버닝 이벤트를 활용하세요: 버닝 이벤트는 캐릭터가 레벨업할 때 추가 경험치를 얻을 수 있는 이벤트입니다. 버닝 이벤트 기간에 새로운 캐릭터를 생성하면 한 번에 3레벨이 오르므로, 육성이 빠르게 진행될 수 있습니다.
+
+    # 2. 적절한 사냥터를 선택하세요: 사냥터는 캐릭터의 레벨에 맞게 선택하는 것이 중요합니다. 주변에 자리가 많고 지형이 좋은 곳을 선택하여 사냥하면 좋습니다. 또한, 레벨 30까지는 에델슈타인 가로등길이나 개들의 싸움터를 추천합니다.
+    # ...
+
 ```
 
 ## 3. 문서 구조 
